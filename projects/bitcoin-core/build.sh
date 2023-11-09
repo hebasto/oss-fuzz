@@ -40,7 +40,7 @@ fi
 (
   cd depends
   sed -i --regexp-extended '/.*rm -rf .*extract_dir.*/d' ./funcs.mk  # Keep extracted source
-  make HOST=$BUILD_TRIPLET DEBUG=1 LTO=1 NO_QT=1 NO_BDB=1 NO_ZMQ=1 NO_UPNP=1 NO_NATPMP=1 NO_USDT=1 AR=llvm-ar RANLIB=llvm-ranlib CPPFLAGS="-DBOOST_MULTI_INDEX_ENABLE_SAFE_MODE ${FIX_32BIT:-}" -j$(nproc)
+  make HOST=$BUILD_TRIPLET DEBUG=1 NO_QT=1 NO_BDB=1 NO_ZMQ=1 NO_UPNP=1 NO_NATPMP=1 NO_USDT=1 AR=llvm-ar RANLIB=llvm-ranlib CPPFLAGS="-DBOOST_MULTI_INDEX_ENABLE_SAFE_MODE ${FIX_32BIT:-}" -j$(nproc)
 )
 
 # Build the fuzz targets
@@ -49,17 +49,17 @@ mkdir build
 cd build
 
 # OSS-Fuzz will provide CC, CXX, etc. So only set:
-# * --enable-fuzz, see https://github.com/bitcoin/bitcoin/blob/master/doc/fuzzing.md
-# * CONFIG_SITE, see https://github.com/bitcoin/bitcoin/blob/master/depends/README.md
+# * -DFUZZ_OSS=ON, see https://github.com/bitcoin/bitcoin/blob/master/doc/fuzzing.md
+# * --toolchain, see https://github.com/bitcoin/bitcoin/blob/master/depends/README.md
 if [ "$SANITIZER" = "memory" ]; then
-  LDFLAGS="$LIB_FUZZING_ENGINE" cmake -S .. -DASM=OFF -DFUZZ=ON -DHARDENING=OFF --toolchain ../depends/$BUILD_TRIPLET/share/toolchain.cmake
+  cmake -S .. -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX -DCMAKE_BUILD_TYPE=None -DFUZZ_OSS=ON -DASM=OFF -DHARDENING=OFF --toolchain depends/${BUILD_TRIPLET}/share/toolchain.cmake
 else
-  LDFLAGS="$LIB_FUZZING_ENGINE" cmake -S .. -DFUZZ=ON --toolchain ../depends/$BUILD_TRIPLET/share/toolchain.cmake
+  cmake -S .. -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX -DCMAKE_BUILD_TYPE=None -DFUZZ_OSS=ON --toolchain depends/${BUILD_TRIPLET}/share/toolchain.cmake
 fi
 
 cmake --build . -j$(nproc)
 
-WRITE_ALL_FUZZ_TARGETS_AND_ABORT="/tmp/a" "../src/test/fuzz/fuzz" || true
+WRITE_ALL_FUZZ_TARGETS_AND_ABORT="/tmp/a" "./src/test/fuzz/fuzz" || true
 readarray FUZZ_TARGETS < "/tmp/a"
 if [ -n "${OSS_FUZZ_CI-}" ]; then
   # When running in CI, check the first targets only to save time and disk space
@@ -80,15 +80,15 @@ make -j$(nproc)
 
 # Replace the magic string with the actual name of each fuzz target
 for fuzz_target in ${FUZZ_TARGETS[@]}; do
-  python3 -c "c_str_target=b\"${fuzz_target}\x00\";c_str_magic=b\"$MAGIC_STR\";dat=open('../src/test/fuzz/fuzz','rb').read();dat=dat.replace(c_str_magic, c_str_target+c_str_magic[len(c_str_target):]);open(\"$OUT/$fuzz_target\",'wb').write(dat)"
+  python3 -c "c_str_target=b\"${fuzz_target}\x00\";c_str_magic=b\"$MAGIC_STR\";dat=open('./src/test/fuzz/fuzz','rb').read();dat=dat.replace(c_str_magic, c_str_target+c_str_magic[len(c_str_target):]);open(\"$OUT/$fuzz_target\",'wb').write(dat)"
 
   chmod +x "$OUT/$fuzz_target"
   (
-    cd assets/fuzz_seed_corpus
+    cd ../assets/fuzz_seed_corpus
     if [ -d "$fuzz_target" ]; then
       zip --recurse-paths --quiet --junk-paths "$OUT/${fuzz_target}_seed_corpus.zip" "${fuzz_target}"
     fi
   )
 done
 
-cp assets/fuzz_dicts/*.dict $OUT/
+cp ../assets/fuzz_dicts/*.dict $OUT/
