@@ -37,34 +37,41 @@ export LDFLAGS="-flto=thin"
 
 if [ "$ARCHITECTURE" = "i386" ]; then
 # Temporary workaround for building sqlite for 32-bit. Due to https://github.com/google/oss-fuzz/pull/10466#issuecomment-1576658462
-export FIX_32BIT=" -m32"
+export FIX_32BIT="-m32"
 fi
 
-export CPPFLAGS="-DBOOST_MULTI_INDEX_ENABLE_SAFE_MODE ${FIX_32BIT:-}"
+export CPPFLAGS="-DBOOST_MULTI_INDEX_ENABLE_SAFE_MODE"
 
 (
   cd depends
   sed -i --regexp-extended '/.*rm -rf .*extract_dir.*/d' ./funcs.mk  # Keep extracted source
   make HOST=$BUILD_TRIPLET DEBUG=1 NO_QT=1 NO_BDB=1 NO_ZMQ=1 NO_UPNP=1 NO_NATPMP=1 NO_USDT=1 \
        AR=llvm-ar NM=llvm-nm RANLIB=llvm-ranlib STRIP=llvm-strip \
-       CPPFLAGS="$CPPFLAGS" CXXFLAGS="$CXXFLAGS" LDFLAGS="$LDFLAGS" -j$(nproc)
+       CC="$CC ${FIX_32BIT:-}" CXX="$CXX ${FIX_32BIT:-}" CPPFLAGS="$CPPFLAGS" CXXFLAGS="$CXXFLAGS" LDFLAGS="$LDFLAGS" -j$(nproc)
 )
 
 # Build the fuzz targets
 
-sed -i "s|PROVIDE_FUZZ_MAIN_FUNCTION|NEVER_PROVIDE_MAIN_FOR_OSS_FUZZ|g" "./configure.ac"
-./autogen.sh
+sed -i "s|PROVIDE_FUZZ_MAIN_FUNCTION|NEVER_PROVIDE_MAIN_FOR_OSS_FUZZ|g" "./src/test/fuzz/util/CMakeLists.txt"
+mkdir build && cd build
 
 # OSS-Fuzz will provide CC, CXX, etc. So only set:
-# * --enable-fuzz, see https://github.com/bitcoin/bitcoin/blob/master/doc/fuzzing.md
-# * CONFIG_SITE, see https://github.com/bitcoin/bitcoin/blob/master/depends/README.md
+# * -DFUZZ=ON, see https://github.com/bitcoin/bitcoin/blob/master/doc/fuzzing.md
+# * --toolchain, see https://github.com/bitcoin/bitcoin/blob/master/depends/README.md
+EXTRA_BUILD_OPTIONS=
 if [ "$SANITIZER" = "memory" ]; then
-  CONFIG_SITE="$PWD/depends/$BUILD_TRIPLET/share/config.site" ./configure --enable-fuzz SANITIZER_LDFLAGS="$LIB_FUZZING_ENGINE" --disable-hardening --with-asm=no
-else
-  CONFIG_SITE="$PWD/depends/$BUILD_TRIPLET/share/config.site" ./configure --enable-fuzz SANITIZER_LDFLAGS="$LIB_FUZZING_ENGINE"
+  EXTRA_BUILD_OPTIONS="-DHARDENING=OFF -DASM=OFF"
 fi
+# This avoids flags duplication as they also are picked from the toolchain file.
+env -u CFLAGS -u CXXFLAGS \
+cmake -S .. \
+  --toolchain depends/${BUILD_TRIPLET}/share/toolchain.cmake \
+  -DCMAKE_BUILD_TYPE=None \
+  -DFUZZ=ON \
+  -DSANITIZER_LDFLAGS="$LIB_FUZZING_ENGINE" \
+  $EXTRA_BUILD_OPTIONS
 
-make -j$(nproc)
+cmake --build . -j$(nproc)
 
 WRITE_ALL_FUZZ_TARGETS_AND_ABORT="/tmp/a" "./src/test/fuzz/fuzz" || true
 readarray FUZZ_TARGETS < "/tmp/a"
@@ -81,7 +88,7 @@ fi
 # replace the string in the source code and re-invoke 'make'. This is slower,
 # so use the hack.
 export MAGIC_STR="b5813eee2abc9d3358151f298b75a72264ffa119d2f71ae7fefa15c4b70b4bc5b38e87e3107a730f25891ea428b2b4fabe7a84f5bfa73c79e0479e085e4ff157"
-sed -i "s|std::getenv(\"FUZZ\")|\"$MAGIC_STR\"|g" "./src/test/fuzz/fuzz.cpp"
+sed -i "s|std::getenv(\"FUZZ\")|\"$MAGIC_STR\"|g" "../src/test/fuzz/fuzz.cpp"
 make -j$(nproc)
 
 # Replace the magic string with the actual name of each fuzz target
@@ -90,11 +97,11 @@ for fuzz_target in ${FUZZ_TARGETS[@]}; do
 
   chmod +x "$OUT/$fuzz_target"
   (
-    cd assets/fuzz_seed_corpus
+    cd ../assets/fuzz_seed_corpus
     if [ -d "$fuzz_target" ]; then
       zip --recurse-paths --quiet --junk-paths "$OUT/${fuzz_target}_seed_corpus.zip" "${fuzz_target}"
     fi
   )
 done
 
-cp assets/fuzz_dicts/*.dict $OUT/
+cp ../assets/fuzz_dicts/*.dict $OUT/
