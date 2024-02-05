@@ -23,7 +23,12 @@ RUN apt-get update && apt-get install -y \
   automake autotools-dev bsdmainutils build-essential cmake curl g++-multilib libtool make \
   patch pkg-config python3 wget zip
 
-RUN git clone --depth=1 https://github.com/bitcoin/bitcoin.git bitcoin-core
+# The second commit from 240124-cmake-AZ-OSSF-0205.0 on 2024-02-05.
+RUN mkdir bitcoin-core && cd bitcoin-core && \
+    git init && \
+    git remote add origin https://github.com/hebasto/bitcoin.git && \
+    git fetch --depth 1 origin 944362a4521ba0ba674620d5a696039ec32ded8f && \
+    git checkout FETCH_HEAD
 RUN git clone --depth=1 https://github.com/bitcoin-core/qa-assets bitcoin-core/assets && \
   rm -rf bitcoin-core/assets/.git  # Remove git history to save storage
 RUN git clone --depth 1 https://github.com/guidovranken/cryptofuzz
