@@ -59,7 +59,6 @@ if [ "$SANITIZER" = "memory" ]; then
 fi
 cmake -S .. \
   --toolchain depends/${BUILD_TRIPLET}/share/toolchain.cmake \
-  -DCMAKE_BUILD_TYPE=None \
   -DCMAKE_C_FLAGS="$CFLAGS" \
   -DCMAKE_CXX_FLAGS="$CXXFLAGS" \
   -DFUZZ=ON \
