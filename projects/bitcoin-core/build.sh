@@ -59,7 +59,7 @@ else
   CONFIG_SITE="$PWD/depends/$BUILD_TRIPLET/share/config.site" ./configure --enable-fuzz SANITIZER_LDFLAGS="$LIB_FUZZING_ENGINE"
 fi
 
-make -j$(nproc)
+make -j$(nproc) V=1
 
 WRITE_ALL_FUZZ_TARGETS_AND_ABORT="/tmp/a" "./src/test/fuzz/fuzz" || true
 readarray FUZZ_TARGETS < "/tmp/a"
