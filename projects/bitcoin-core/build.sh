@@ -36,7 +36,10 @@ fi
 # export CXXFLAGS="$CXXFLAGS -flto=thin"
 # export LDFLAGS="-flto=thin"
 
-export CPPFLAGS="-DBOOST_MULTI_INDEX_ENABLE_SAFE_MODE"
+# Not using the CPPFLAGS environment variable, as it
+# disables $(host_os)_$(release_type)_CPPFLAGS in depends.
+export CFLAGS="$CFLAGS -DBOOST_MULTI_INDEX_ENABLE_SAFE_MODE"
+export CXXFLAGS="$CXXFLAGS -DBOOST_MULTI_INDEX_ENABLE_SAFE_MODE"
 
 (
   cd depends
