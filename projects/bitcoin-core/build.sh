@@ -20,6 +20,8 @@ date
 
 cd $SRC/bitcoin-core/
 
+apt-get install libcapnp-dev capnproto
+
 # Build dependencies
 # This will also force static builds
 if [ "$ARCHITECTURE" = "i386" ]; then
