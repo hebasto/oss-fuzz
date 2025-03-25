@@ -1,5 +1,6 @@
 name: ClusterFuzzLite PR fuzzing
 on:
+  push:
   pull_request:
     paths:
       - 'infra/**'
