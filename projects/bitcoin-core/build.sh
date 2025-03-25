@@ -86,6 +86,7 @@ cmake -B build_fuzz \
   -DCMAKE_CXX_FLAGS_RELWITHDEBINFO="" \
   -DBUILD_FOR_FUZZING=ON \
   -DFUZZ_LIBS="$LIB_FUZZING_ENGINE" \
+  -DCapnProto_DIR=/usr/lib/x86_64-linux-gnu/cmake/CapnProto
   $EXTRA_BUILD_OPTIONS
 
 cmake --build build_fuzz -j$(nproc)
