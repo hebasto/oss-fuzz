@@ -22,6 +22,17 @@ cd $SRC/bitcoin-core/
 
 apt-get install libcapnp-dev capnproto
 
+
+echo 88888888888888888888888888888888888888888888888888888888888888888888888888888
+cat /etc/os-release
+echo 88888888888888888888888888888888888888888888888888888888888888888888888888888
+which -a cmake
+/usr/local/bin/cmake --version
+/usr/bin/cmake --version
+/bin/cmake --version
+echo 88888888888888888888888888888888888888888888888888888888888888888888888888888
+
+
 # Build dependencies
 # This will also force static builds
 if [ "$ARCHITECTURE" = "i386" ]; then
