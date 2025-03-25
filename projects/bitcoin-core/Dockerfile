@@ -21,6 +21,7 @@ FROM gcr.io/oss-fuzz-base/base-builder
 # * https://github.com/bitcoin/bitcoin/blob/master/depends/README.md#for-linux-including-i386-arm-cross-compilation
 RUN apt-get update && apt-get install -y \
   automake autotools-dev bsdmainutils build-essential cmake curl g++-multilib libtool make \
+  libcapnp-dev capnproto \
   patch pkg-config python3 wget zip
 
 RUN git clone --depth=1 --branch pr31741m/0325 https://github.com/hebasto/bitcoin.git bitcoin-core
