@@ -23,7 +23,7 @@ RUN apt-get update && apt-get install -y \
   build-essential curl g++-multilib make \
   patch pkgconf python3 wget zip
 
-RUN git clone --depth=1 --branch 250330-oss-fuzz.FAIL https://github.com/hebasto/bitcoin.git bitcoin-core
+RUN git clone --depth=1 --branch 250330-oss-fuzz.FAIL.reverted https://github.com/hebasto/bitcoin.git bitcoin-core
 RUN git clone --depth=1 https://github.com/bitcoin-core/qa-assets bitcoin-core/assets && \
   rm -rf bitcoin-core/assets/.git  # Remove git history to save storage
 RUN git clone --depth 1 https://github.com/bitcoin-core/secp256k1.git
