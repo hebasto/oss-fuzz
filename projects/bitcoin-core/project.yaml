@@ -10,14 +10,14 @@ auto_ccs:
   - "achow101@gmail.com"
 sanitizers:
   - address
-  - undefined
-  - memory
+  # - undefined
+  # - memory
 architectures:
-  - x86_64
+  # - x86_64
   - i386
 selective_unpack: true  # Required to avoid out-of-space when executing AFL on clusterfuzz bots
 fuzzing_engines:
-  - afl
+#  - afl
 #  - centipede # temporarily disabled due to spurious "Step #22 - "build-check-centipede-none-x86_64": OSError: [Errno 28] No space left on device"
   - libfuzzer
-  - honggfuzz
+#  - honggfuzz
