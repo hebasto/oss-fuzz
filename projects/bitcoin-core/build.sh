@@ -47,15 +47,16 @@ echo "LDFLAGS =${LDFLAGS:-}"
 echo | $CXX -stdlib=libc++ -E -x c++ - -v
 echo "++++++++++++++++++++++++++++++++++++++++++++"
 $CXX -print-search-dirs
-ls /usr/local/lib/clang/22
-ls /usr/local/bin/../lib/x86_64-unknown-linux-gnu
-ls /usr/local/lib/clang/22/lib/x86_64-unknown-linux-gnu
-ls /lib/x86_64-linux-gnu
-ls /lib/../lib64
-ls /usr/lib/x86_64-linux-gnu
-ls /usr/lib64
-ls /lib
-ls /usr/lib
+# ls /usr/local/lib/clang/22
+ls /usr/local/lib
+ls /usr/local/bin/../lib/x86_64-unknown-linux-gnu  # has libc++.a
+# ls /usr/local/lib/clang/22/lib/x86_64-unknown-linux-gnu
+# ls /lib/x86_64-linux-gnu
+# ls /lib/../lib64
+# ls /usr/lib/x86_64-linux-gnu
+# ls /usr/lib64
+# ls /lib
+# ls /usr/lib
 echo "++++++++++++++++++++++++++++++++++++++++++++"
 
 # export CPPFLAGS="-D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_DEBUG -DBOOST_MULTI_INDEX_ENABLE_SAFE_MODE"
