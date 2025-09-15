@@ -46,7 +46,8 @@ echo "CXXFLAGS=${CXXFLAGS:-}"
 echo "LDFLAGS =${LDFLAGS:-}"
 echo | $CXX -stdlib=libc++ -E -x c++ - -v
 echo "++++++++++++++++++++++++++++++++++++++++++++"
-
+$CXX -print-search-dirs
+echo "++++++++++++++++++++++++++++++++++++++++++++"
 
 # export CPPFLAGS="-D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_DEBUG -DBOOST_MULTI_INDEX_ENABLE_SAFE_MODE"
 
