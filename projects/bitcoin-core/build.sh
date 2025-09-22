@@ -47,6 +47,7 @@ echo "LDFLAGS =${LDFLAGS:-}"
 echo | $CXX -stdlib=libc++ -E -x c++ - -v
 echo "++++++++++++++++++++++++++++++++++++++++++++"
 $CXX -print-search-dirs
+ls /usr/local/lib
 ls /usr/local/lib/clang/22/lib/i386-unknown-linux-gnu
 ls /usr/local/lib/clang/22/lib/x86_64-unknown-linux-gnu
 echo "++++++++++++++++++++++++++++++++++++++++++++"
