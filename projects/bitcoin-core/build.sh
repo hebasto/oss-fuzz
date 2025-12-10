@@ -28,9 +28,10 @@ else
   export BUILD_TRIPLET="x86_64-pc-linux-gnu"
 fi
 
-
-export CFLAGS="$CFLAGS -flto=full"
-export CXXFLAGS="$CXXFLAGS -flto=full"
+# The removal of -Wno-error=unknown-warning-option can be reverted
+# once https://github.com/bitcoin/bitcoin/pull/34047 is merged.
+export CFLAGS="${CFLAGS/-Wno-error=unknown-warning-option/} -flto=full"
+export CXXFLAGS="${CXXFLAGS/-Wno-error=unknown-warning-option/} -flto=full"
 # Use lld to workaround <module> referenced in <section> of /tmp/lto-llvm-*.o: defined in discarded section
 export LDFLAGS="-fuse-ld=lld -flto=full"
 
